@@ -41,7 +41,21 @@ soundfont.url = function(name) {
  */
 soundfont.noteToBufferName = function(note) {
   var name = note.toLowerCase();
-  if(name.indexOf('#') > 0) {
+
+  // reduce Fb to E and E# -> F
+  if (name.match(/(e#|fb)/i)) {
+    return name.replace(/e#/i, 'f').replace(/fb/i, 'e');
+
+  // reduce Cb(n) -> B(n-1), B#(n) -> B(n+1)
+  } else if (name.match(/(cb|b#)/i)) {
+
+    return name.replace(/(cb|b#)([0-9])/i, function (_, note, n) {
+      return note.match(/cb/i) ? 'b' + (+n - 1) : 'c' + (+n + 1);
+    });
+
+  // convert # to b (in mapping)
+  } else if (name.indexOf('#') > 0) {
+
     name = name.replace(/#/g, 'b');
     var pc = String.fromCharCode(name.charCodeAt(0) + 1);
     pc = pc === 'h' ? 'a' : pc;
